@@ -38,7 +38,6 @@ export const items = [
       </SvgIcon>
     ),
   },
-  
 
   {
     title: "Restaurants",

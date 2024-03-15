@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useReducer, useRef } from "react";
 import PropTypes from "prop-types";
+import axios from "../utils/constant/axiosConfig";
 
 const HANDLERS = {
   INITIALIZE: "INITIALIZE",
@@ -89,6 +90,23 @@ export const AuthProvider = (props) => {
         type: HANDLERS.INITIALIZE,
         payload: user,
       });
+
+      // try {
+      //   // Make an API request to fetch user data
+      //   const response = await axios.get("/getAdminData");
+
+      //   if (response.status === 200) {
+      //     // Update the state with the fetched user data
+      //     dispatch({
+      //       type: HANDLERS.INITIALIZE,
+      //       payload: response.data.user,
+      //     });
+      //   } else {
+      //     throw new Error("Failed to fetch user data");
+      //   }
+      // } catch (error) {
+      //   console.error("Error fetching user data:", error);
+      // }
     } else {
       dispatch({
         type: HANDLERS.INITIALIZE,

@@ -171,9 +171,7 @@ const customersData = [
 const Page = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  // const customers = useCustomers(page, rowsPerPage);
-  // const customersIds = useCustomerIds(customers);
-  // const customersSelection = useSelection(customersIds);
+  const [searchQuery, setSearchQuery] = useState(""); // State to hold the search query
 
   const handlePageChange = useCallback((event, value) => {
     setPage(value);
@@ -183,6 +181,10 @@ const Page = () => {
     setRowsPerPage(event.target.value);
   }, []);
 
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+    setPage(0); // Reset page when search query changes
+  };
   return (
     <>
       <Head>
@@ -202,11 +204,12 @@ const Page = () => {
                 <Typography variant="h4">All Customers</Typography>
               </Stack>
             </Stack>
-            <CustomersSearch />
+            <CustomersSearch handleSearchChange={handleSearchChange} />
             <CustomersTable
               count={customersData.length}
               setPage={setPage}
               customersData={customersData}
+              searchQuery={searchQuery}
               //onDeselectAll={customersSelection.handleDeselectAll}
               //onDeselectOne={customersSelection.handleDeselectOne}
               onPageChange={handlePageChange}

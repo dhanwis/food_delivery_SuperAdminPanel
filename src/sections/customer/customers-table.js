@@ -95,19 +95,32 @@ export const CustomersTable = (props) => {
     onSelectOne,
     page = 0,
     rowsPerPage = 0,
+    searchQuery,
     selected = [],
   } = props;
 
-  //const selectedSome = selected.length > 0 && selected.length < items.length;
-  //const selectedAll = items.length > 0 && selected.length === items.length;
+  // const startIndex = page * rowsPerPage; // which is eg: (2*5 == 10)
+  // const endIndex = startIndex + rowsPerPage;
 
-  //const rowsPerPage = 5;
-  //const [page, setPage] = useState(0);
+  // const displayedRows = customersData.slice(startIndex, endIndex);
 
-  const startIndex = page * rowsPerPage; // which is eg: (2*5 == 10)
-  const endIndex = startIndex + rowsPerPage;
+  // const handlePageChange = (event, newPage) => {
+  //   setPage(newPage - 1);
+  // };
 
-  const displayedRows = customersData.slice(startIndex, endIndex);
+  // Filter franchises based on search query
+  const filteredCustomers = customersData.filter((customer) =>
+    customer.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const totalCustomers = filteredCustomers.length;
+  const totalPages = Math.ceil(totalCustomers / rowsPerPage);
+
+  // Calculate displayed franchises based on pagination
+  const startIndex = page * rowsPerPage;
+  const endIndex = Math.min(startIndex + rowsPerPage, totalCustomers);
+
+  const displayedCustomers = filteredCustomers.slice(startIndex, endIndex);
 
   const handlePageChange = (event, newPage) => {
     setPage(newPage - 1);
@@ -142,7 +155,7 @@ export const CustomersTable = (props) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {displayedRows.map((customer) => {
+              {displayedCustomers.map((customer) => {
                 const isSelected = selected.includes(customer.id);
                 const createdAt = format(customer.createdAt, "dd/MM/yyyy");
 
@@ -182,27 +195,14 @@ export const CustomersTable = (props) => {
           </Table>
         </Box>
       </Scrollbar>
-      {/* <TablePagination
-        component="div"
-        count={count}
-        onPageChange={onPageChange}
-        onRowsPerPageChange={onRowsPerPageChange}
-        page={page}
-        rowsPerPage={rowsPerPage}
-        rowsPerPageOptions={[5, 10, 25]}
-      /> */}
+
       <Box
         sx={{
           display: "flex",
           justifyContent: "center",
         }}
       >
-        <Pagination
-          count={Math.ceil(customersData.length / rowsPerPage)}
-          page={page + 1}
-          onChange={handlePageChange}
-          size="large"
-        />
+        <Pagination count={totalPages} page={page + 1} onChange={handlePageChange} size="large" />
       </Box>
     </Card>
   );

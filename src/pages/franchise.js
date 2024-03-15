@@ -1,6 +1,5 @@
 import Head from "next/head";
-import { useState, useCallback } from "react";
-
+import { useState, useEffect } from "react";
 import PlusIcon from "@heroicons/react/24/solid/PlusIcon";
 import {
   Box,
@@ -15,6 +14,11 @@ import {
 import { Layout as DashboardLayout } from "src/layouts/dashboard/layout";
 import { FranchiseCard } from "src/sections/franchisees/franchise-card";
 import { FranchiseSearch } from "src/sections/franchisees/franchise-search";
+import AddFranchise from "./AddFranchise";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
+
+import { useFranchise } from "src/contexts/franchise-context";
 
 export const franchisesData = [
   {
@@ -23,8 +27,10 @@ export const franchisesData = [
     description:
       "Dropbox is a file hosting service that offers cloud storage, file synchronization, a personal cloud.",
     logo: "/assets/logos/logo-dropbox.png",
-    title: "Dropbox",
-    downloads: "594",
+    name: "Dropbox",
+    restaurants: "594",
+    location: "Chalode",
+    phoneNumber: 1234569870,
   },
   {
     id: "ed2b900870ceba72d203ec15",
@@ -32,8 +38,10 @@ export const franchisesData = [
     description:
       "Medium is an online publishing platform developed by Evan Williams, and launched in August 2012.",
     logo: "/assets/logos/logo-medium.png",
-    title: "Medium Corporation",
-    downloads: "625",
+    name: "Medium Corporation",
+    restaurants: "625",
+    location: "Chakarakal",
+    phoneNumber: 1234569870,
   },
   {
     id: "a033e38768c82fca90df3db7",
@@ -41,24 +49,30 @@ export const franchisesData = [
     description:
       "Slack is a cloud-based set of team collaboration tools and services, founded by Stewart Butterfield.",
     logo: "/assets/logos/logo-slack.png",
-    title: "Slack",
-    downloads: "857",
+    name: "Slack",
+    restaurants: "857",
+    location: "Kannur",
+    phoneNumber: 1234569870,
   },
   {
     id: "1efecb2bf6a51def9869ab0f",
     createdAt: "04/04/2019",
     description: "Lyft is an on-demand transportation company based in San Francisco, California.",
     logo: "/assets/logos/logo-lyft.png",
-    title: "Lyft",
-    downloads: "406",
+    name: "Lyft",
+    restaurants: "406",
+    location: "Uliyil",
+    phoneNumber: 1234569870,
   },
   {
     id: "1ed68149f65fbc6089b5fd07",
     createdAt: "04/04/2019",
     description: "GitHub is a web-based hosting service for version control of code using Git.",
     logo: "/assets/logos/logo-github.png",
-    title: "GitHub",
-    downloads: "835",
+    name: "GitHub",
+    restaurants: "835",
+    location: "Kuthuparambu",
+    phoneNumber: 1234569870,
   },
   {
     id: "5dab321376eff6177407e887",
@@ -66,8 +80,10 @@ export const franchisesData = [
     description:
       "Squarespace provides software as a service for website building and hosting. Headquartered in NYC.",
     logo: "/assets/logos/logo-squarespace.png",
-    title: "Squarespace",
-    downloads: "835",
+    name: "Squarespace",
+    restaurants: "835",
+    location: "Irikkur",
+    phoneNumber: 1234569870,
   },
 
   {
@@ -76,16 +92,20 @@ export const franchisesData = [
     description:
       "Dropbox is a file hosting service that offers cloud storage, file synchronization, a personal cloud.",
     logo: "/assets/logos/logo-dropbox.png",
-    title: "Dropbox",
-    downloads: "594",
+    name: "Dropbox",
+    restaurants: "594",
+    location: "Anjarakandy",
+    phoneNumber: 1234569870,
   },
   {
     id: "1ed68149f65fbc6089b5fd07",
     createdAt: "04/04/2019",
     description: "GitHub is a web-based hosting service for version control of code using Git.",
     logo: "/assets/logos/logo-github.png",
-    title: "GitHub",
-    downloads: "835",
+    name: "GitHub",
+    restaurants: "835",
+    location: "Mattanur",
+    phoneNumber: 1234569870,
   },
   {
     id: "ed2b900870ceba72d203ec15",
@@ -93,8 +113,10 @@ export const franchisesData = [
     description:
       "Medium is an online publishing platform developed by Evan Williams, and launched in August 2012.",
     logo: "/assets/logos/logo-medium.png",
-    title: "Medium Corporation",
-    downloads: "625",
+    name: "Medium Corporation",
+    restaurants: "625",
+    location: "Kodali",
+    phoneNumber: 1234569870,
   },
   {
     id: "5dab321376eff6177407e887",
@@ -102,8 +124,10 @@ export const franchisesData = [
     description:
       "Squarespace provides software as a service for website building and hosting. Headquartered in NYC.",
     logo: "/assets/logos/logo-squarespace.png",
-    title: "Squarespace",
-    downloads: "835",
+    name: "Squarespace",
+    restaurants: "835",
+    location: "Mahe",
+    phoneNumber: 1234569870,
   },
 
   {
@@ -111,8 +135,10 @@ export const franchisesData = [
     createdAt: "04/04/2019",
     description: "Lyft is an on-demand transportation company based in San Francisco, California.",
     logo: "/assets/logos/logo-lyft.png",
-    title: "Lyft",
-    downloads: "406",
+    name: "Lyft",
+    restaurants: "406",
+    location: "Thalassery",
+    phoneNumber: 1234569870,
   },
   {
     id: "a033e38768c82fca90df3db7",
@@ -120,22 +146,73 @@ export const franchisesData = [
     description:
       "Slack is a cloud-based set of team collaboration tools and services, founded by Stewart Butterfield.",
     logo: "/assets/logos/logo-slack.png",
-    title: "Slack",
-    downloads: "857",
+    name: "Slack",
+    restaurants: "857",
+    location: "iritty",
+    phoneNumber: 1234569870,
   },
 ];
 
 const Page = () => {
   const rowsPerPage = 6;
   const [page, setPage] = useState(0);
+  const [open, setOpen] = useState(false);
+  const [franchiseData, setFranchiseData] = useState([]);
+  const { fetchFranchises } = useFranchise();
+  const [isLoading, setIsLoading] = useState(true);
 
-  const startIndex = page * rowsPerPage; // which is eg: (2*5 == 10)
-  const endIndex = startIndex + rowsPerPage;
+  const [searchQuery, setSearchQuery] = useState(""); // State to hold the search query
 
-  const displayedFranchise = franchisees.slice(startIndex, endIndex);
+  useEffect(() => {
+    const fetchData = async () => {
+      const fetchedData = await fetchFranchises();
+      setFranchiseData(fetchedData);
+    };
+    fetchData();
+    setIsLoading(false);
+  }, [fetchFranchises]); // Make sure to include fetchFranchises in the dependency array
+
+  // const startIndex = page * rowsPerPage; // which is eg: (2*5 == 10)
+  // const endIndex = startIndex + rowsPerPage;
+
+  // const displayedFranchise = franchiseData.slice(startIndex, endIndex);
+
+  // const handlePageChange = (event, newPage) => {
+  //   setPage(newPage - 1);
+  // };
+
+  // // Filter franchises based on search query
+  // const filteredFranchises = franchiseData.filter((franchise) =>
+  //   franchise.name.toLowerCase().includes(searchQuery.toLowerCase())
+  // );
+
+  // const handleSearchChange = (event) => {
+  //   setSearchQuery(event.target.value);
+  //   setPage(0); // Reset page when search query changes
+  // };
+
+  // Filter franchises based on search query
+  const filteredFranchises = franchiseData.filter((franchise) =>
+    franchise.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const totalFranchises = filteredFranchises.length;
+  const totalPages = Math.ceil(totalFranchises / rowsPerPage);
+
+  // Calculate displayed franchises based on pagination
+  const startIndex = page * rowsPerPage;
+  const endIndex = Math.min(startIndex + rowsPerPage, totalFranchises);
+
+  const displayedFranchise = filteredFranchises.slice(startIndex, endIndex);
 
   const handlePageChange = (event, newPage) => {
     setPage(newPage - 1);
+  };
+
+  // Function to handle search query change
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+    setPage(0); // Reset page when search query changes
   };
 
   return (
@@ -155,31 +232,10 @@ const Page = () => {
             <Stack direction="row" justifyContent="space-between" spacing={4}>
               <Stack spacing={1}>
                 <Typography variant="h4">Franchisees</Typography>
-                {/* <Stack alignItems="center" direction="row" spacing={1}>
-                <Button
-                  color="inherit"
-                  startIcon={
-                    <SvgIcon fontSize="small">
-                      <ArrowUpOnSquareIcon />
-                    </SvgIcon>
-                  }
-                >
-                  Import
-                </Button>
-                <Button
-                  color="inherit"
-                  startIcon={
-                    <SvgIcon fontSize="small">
-                      <ArrowDownOnSquareIcon />
-                    </SvgIcon>
-                  }
-                >
-                  Export
-                </Button>
-              </Stack> */}
               </Stack>
               <div>
                 <Button
+                  onClick={() => setOpen(!open)}
                   startIcon={
                     <SvgIcon fontSize="small">
                       <PlusIcon />
@@ -191,13 +247,19 @@ const Page = () => {
                 </Button>
               </div>
             </Stack>
-            <FranchiseSearch />
+            <FranchiseSearch handleSearchChange={handleSearchChange} />
             <Grid container spacing={3}>
-              {displayedFranchise.map((franchise) => (
-                <Grid xs={12} md={6} lg={4} key={franchise.id}>
-                  <FranchiseCard franchise={franchise} />
-                </Grid>
-              ))}
+              {isLoading
+                ? Array.from({ length: displayedFranchise.length }).map((_, index) => (
+                    <Grid xs={12} md={6} lg={4} key={index}>
+                      <Skeleton width={210} height={118} duration={1.5} />
+                    </Grid>
+                  ))
+                : displayedFranchise.map((franchise) => (
+                    <Grid xs={12} md={6} lg={4} key={franchise.id}>
+                      <FranchiseCard franchise={franchise} />
+                    </Grid>
+                  ))}
             </Grid>
             <Box
               sx={{
@@ -205,16 +267,24 @@ const Page = () => {
                 justifyContent: "center",
               }}
             >
-              <Pagination
+              {/* <Pagination
                 count={Math.ceil(franchisesData.length / rowsPerPage)}
                 page={page + 1}
                 onChange={handlePageChange}
                 size="large"
+              /> */}
+
+              <Pagination
+                count={totalPages}
+                page={page + 1}
+                onChange={handlePageChange}
+                size="large"
               />
-              {/* <Pagination count={3} size="small" /> */}
             </Box>
           </Stack>
         </Container>
+
+        <AddFranchise open={open} setOpen={setOpen} />
       </Box>
     </>
   );

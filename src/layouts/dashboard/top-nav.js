@@ -28,6 +28,24 @@ export const TopNav = (props) => {
   const smUp = useMediaQuery((theme) => theme.breakpoints.up("sm"));
   const accountPopover = usePopover();
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    let greeting;
+
+    if (hour >= 5 && hour < 12) {
+      greeting = "Good morning";
+    } else if (hour >= 12 && hour < 18) {
+      greeting = "Good afternoon";
+    } else {
+      greeting = "Good evening";
+    }
+
+    return greeting;
+  };
+
+  let greeting = getGreeting();
+  const userName = "Mr./Mrs. Admin";
+
   return (
     <>
       <Box
@@ -66,28 +84,12 @@ export const TopNav = (props) => {
               </IconButton>
             )}
 
-            {/* {!smUp && (
-              <Tooltip title="Search">
-                <IconButton>
-                  <SvgIcon fontSize="small">
-                    <MagnifyingGlassIcon />
-                  </SvgIcon>
-                </IconButton>
-              </Tooltip>
-            )} */}
-
-            {smUp && (
-              <Tooltip title="Search">
-                <Search />
-              </Tooltip>
-            )}
-
-            <Tooltip title="Search">
-              <IconButton>
-                {/* <SvgIcon fontSize="small">
-                  <MagnifyingGlassIcon />
-                </SvgIcon> */}
-              </IconButton>
+            <Tooltip title="Greetings" arrow>
+              <div className="greeting-container">
+                <h4 className="greeting-text">
+                  {greeting} {userName}
+                </h4>
+              </div>
             </Tooltip>
           </Stack>
           <Stack alignItems="center" direction="row" spacing={2}>
@@ -107,17 +109,6 @@ export const TopNav = (props) => {
                 </Badge>
               </IconButton>
             </Tooltip>
-            {/* <Avatar
-              onClick={accountPopover.handleOpen}
-              ref={accountPopover.anchorRef}
-              sx={{
-                cursor: "pointer",
-                height: 40,
-                width: 40,
-              }}
-              src="/assets/avatars/avatar-anika-visser.png"
-            />
-            <Typography variant="subtitle1">John Doe</Typography> */}
 
             <Stack
               direction="row"

@@ -1,193 +1,154 @@
 import PropTypes from "prop-types";
-import { useState } from "react";
-import DeleteIcon from "@mui/icons-material/Delete";
-import BlockIcon from "@mui/icons-material/Block";
+import { useEffect, useState } from "react";
 import Building from "@heroicons/react/24/solid/BuildingStorefrontIcon";
 import NextLink from "next/link";
+import BlockIcon from "@mui/icons-material/Block";
 
-// import ArrowDownOnSquareIcon from "@heroicons/react/24/solid/ArrowDownOnSquareIcon";
-// import ClockIcon from "@heroicons/react/24/solid/ClockIcon";
 import {
   Avatar,
   Box,
-  TextField,
   Card,
   CardContent,
   Divider,
   Stack,
   SvgIcon,
   Typography,
-  Dialog,
-  DialogContent,
-  DialogActions,
   Button,
 } from "@mui/material";
-import PlusIcon from "@heroicons/react/24/solid/PlusIcon";
+import FranchiseDetails from "./franchiseDetailPage";
+import { Edit } from "@mui/icons-material";
+import EditDialog from "./EditDialog";
 
 export const FranchiseCard = (props) => {
   const { franchise } = props;
+
   const [open, setOpen] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
 
   const handleOpen = () => {
     setOpen(true);
+    setShowDetails(false);
   };
 
-  const handleClose = () => {
-    setOpen(false);
+  const handleOpenDetailPage = () => {
+    setShowDetails(true);
   };
-
-  const handleChange = () => {};
-  const handleSubmit = () => {};
-  const handleBlock = () => {};
-  const handleDelete = () => {};
-
-  const formData = { name: "any", description: "something" };
 
   return (
     <>
-      <NextLink href={`/franchises/${franchise.id}`} style={{ textDecoration: "none" }} passHref>
-        <Card
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            height: "100%",
-            cursor: "pointer",
-            border: "1px solid rgba(0, 0, 0, 0.1)",
-          }}
-        >
-          <CardContent>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                pb: 3,
-              }}
-            >
-              <Avatar src={franchise.logo} variant="square" />
-            </Box>
-            <Typography align="center" gutterBottom variant="h5">
-              {franchise.title}
-            </Typography>
-            <Typography align="center" variant="body1">
-              {franchise.description}
-            </Typography>
-          </CardContent>
-          <Box sx={{ flexGrow: 1 }} />
-          <Divider />
-          <Stack
-            alignItems="center"
-            direction="row"
-            justifyContent="space-between"
-            spacing={2}
-            sx={{ p: 2 }}
+      {/* <NextLink href={`/franchises/${franchise.id}`} style={{ textDecoration: "none" }} passHref>
+        
+      </NextLink> */}
+
+      <Card
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
+          cursor: "pointer",
+          border: "1px solid rgba(0, 0, 0, 0.1)",
+          filter: franchise.status === "blocked" ? "blur(1px)" : "none",
+        }}
+      >
+        <CardContent onClick={handleOpenDetailPage}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              pb: 3,
+            }}
           >
-            <Stack alignItems="center" direction="row" spacing={1}>
-              <SvgIcon color="action" fontSize="small">
-                <Building />
-              </SvgIcon>
-              <Typography color="text.secondary" display="inline" variant="body2">
-                {franchise.downloads} Restaurants
-              </Typography>
-            </Stack>
-            <Stack alignItems="center" direction="row" spacing={1}>
-              {/* <SvgIcon color="action" fontSize="small">
-            <ClockIcon />
-          </SvgIcon>
-          <Typography color="text.secondary" display="inline" variant="body2">
-            Updated 2hr ago
-          </Typography> */}
-              <div>
-                <Button
-                  onClick={handleOpen}
-                  startIcon={
-                    <SvgIcon fontSize="small">
-                      <PlusIcon />
-                    </SvgIcon>
-                  }
-                  variant="contained"
-                >
-                  Manage
-                </Button>
-              </div>
-            </Stack>
-          </Stack>
-        </Card>
-      </NextLink>
-
-      <Dialog open={open} onClose={handleClose}>
-        <DialogContent>
-          {/* Edit form section */}
-          <Typography variant="h6" gutterBottom>
-            Edit Franchise
+            <Avatar src={franchise.imageUrl} variant="square" />
+          </Box>
+          <Typography align="center" gutterBottom variant="h5">
+            {franchise.name}
           </Typography>
-          <form onSubmit={handleSubmit}>
-            <TextField
-              fullWidth
-              label="Franchise Name"
-              name="name"
-              value={formData.title}
-              onChange={handleChange}
-              variant="outlined"
-              margin="normal"
-            />
-            <TextField
-              fullWidth
-              label="Description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              variant="outlined"
-              margin="normal"
-            />
-            {/* Add more fields as needed */}
-            <Button
-              onClick={handleBlock}
-              variant="contained"
-              sx={{
-                marginRight: 1,
-                bgcolor: "black",
-                "&:hover": {
-                  bgcolor: "black", // Change to your desired hover color
-                },
-              }}
-              startIcon={
-                <SvgIcon fontSize="small">
-                  <BlockIcon />
-                </SvgIcon>
-              }
-            >
-              Block
-            </Button>
-            <Button
-              onClick={handleDelete}
-              variant="contained"
-              startIcon={
-                <SvgIcon fontSize="small">
-                  <DeleteIcon />
-                </SvgIcon>
-              }
-              sx={{
-                marginRight: 1,
-                bgcolor: "red",
-                "&:hover": {
-                  bgcolor: "red", // Change to your desired hover color
-                },
-              }}
-            >
-              Delete
-            </Button>
+          <Typography
+            align="center"
+            variant="body1"
+            sx={{ marginBottom: "10px", marginTop: "20px" }}
+          >
+            Phone: {franchise.phoneNumber}
+          </Typography>
+          <Box sx={{ marginBottom: 1 }}>
+            {" "}
+            {/* Add margin bottom to create space */}
+            <Typography align="center" variant="body1">
+              createdAt: {franchise.createdAt}
+            </Typography>
+          </Box>
+          <Typography align="center" variant="body1">
+            location: {franchise.location}
+          </Typography>
+        </CardContent>
+        <Box sx={{ flexGrow: 1 }} />
+        <Divider />
+        <Stack
+          alignItems="center"
+          direction="row"
+          justifyContent="space-between"
+          spacing={2}
+          sx={{ p: 2 }}
+        >
+          <Stack alignItems="center" direction="row" spacing={1}>
+            <SvgIcon color="action" fontSize="small">
+              <Building />
+            </SvgIcon>
+            <Typography color="text.secondary" display="inline" variant="body2">
+              {franchise.restaurants} Restaurants
+            </Typography>
+          </Stack>
 
-            <DialogActions>
-              <Button onClick={handleClose} color="primary">
-                Cancel
+          <Stack alignItems="center" direction="row">
+            <div>
+              <Button
+                onClick={handleOpen}
+                startIcon={
+                  <SvgIcon fontSize="small">
+                    <Edit />
+                  </SvgIcon>
+                }
+                variant="contained"
+                onMouseDown={(e) => e.stopPropagation()} // Prevents the click event from reaching the card
+              >
+                Manage
               </Button>
-              <Button type="submit" color="primary">
-                Save Changes
-              </Button>
-            </DialogActions>
-          </form>
-        </DialogContent>
-      </Dialog>
+            </div>
+          </Stack>
+        </Stack>
+
+        {franchise.status === "blocked" && (
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              backgroundColor: "rgba(255, 0, 0, 0.5)", // Red overlay
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              flexDirection: "column",
+            }}
+          >
+            <Typography variant="h6" style={{ color: "#fff", fontWeight: "bold" }}>
+              Currently Blocked
+            </Typography>
+            <BlockIcon style={{ color: "#fff", fontSize: "40px" }} />
+          </div>
+        )}
+      </Card>
+
+      {showDetails && (
+        <FranchiseDetails franchise={franchise} onClose={() => setShowDetails(false)} />
+      )}
+
+      {open && (
+        <EditDialog
+          open={open}
+          setOpen={setOpen}
+          franchiseData={franchise}
+          franchiseId={franchise._id}
+        />
+      )}
     </>
   );
 };

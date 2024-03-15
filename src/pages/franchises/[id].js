@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { getFranchiseById } from "../../api/franchises"; // Your function to fetch franchise data
+import { getFranchiseById } from "src/utils/franchiseService";
 
 const FranchiseDetailsPage = () => {
   const router = useRouter();

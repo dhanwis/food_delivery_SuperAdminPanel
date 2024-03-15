@@ -1,5 +1,4 @@
-// Assume franchises.json contains an array of franchise objects
- 
+import { franchisesData } from "src/pages/franchise";
 
 export const getFranchiseById = (id) => {
   return new Promise((resolve, reject) => {
