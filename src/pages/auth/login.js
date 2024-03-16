@@ -23,12 +23,14 @@ const Page = () => {
   const router = useRouter();
   const auth = useAuth();
   const [method, setMethod] = useState("email");
+
   const formik = useFormik({
     initialValues: {
-      email: "demo@devias.io",
-      password: "Password123!",
+      email: "",
+      password: "",
       submit: null,
     },
+
     validationSchema: Yup.object({
       email: Yup.string().email("Must be a valid email").max(255).required("Email is required"),
       password: Yup.string().max(255).required("Password is required"),
@@ -53,15 +55,10 @@ const Page = () => {
     setMethod(value);
   }, []);
 
-  // const handleSkip = useCallback(() => {
-  //   auth.skip();
-  //   router.push("/");
-  // }, [auth, router]);
-
   return (
     <>
       <Head>
-        <title>Login | Devias Kit</title>
+        <title>Login | Super Admin</title>
       </Head>
       <Box
         sx={{
@@ -83,17 +80,6 @@ const Page = () => {
           <div>
             <Stack spacing={1} sx={{ mb: 3 }}>
               <Typography variant="h4">Login</Typography>
-              {/* <Typography color="text.secondary" variant="body2">
-                Don&apos;t have an account? &nbsp;
-                <Link
-                  component={NextLink}
-                  href="/auth/register"
-                  underline="hover"
-                  variant="subtitle2"
-                >
-                  Register
-                </Link>
-              </Typography> */}
             </Stack>
             <Tabs onChange={handleMethodChange} sx={{ mb: 3 }} value={method}>
               <Tab label="Email" value="email" />
@@ -111,7 +97,7 @@ const Page = () => {
                     onBlur={formik.handleBlur}
                     onChange={formik.handleChange}
                     type="email"
-                    value={formik.values.email}
+                    //value={formik.values.email}
                   />
                   <TextField
                     error={!!(formik.touched.password && formik.errors.password)}
@@ -122,10 +108,10 @@ const Page = () => {
                     onBlur={formik.handleBlur}
                     onChange={formik.handleChange}
                     type="password"
-                    value={formik.values.password}
+                    //value={formik.values.password}
                   />
                 </Stack>
-                <FormHelperText sx={{ mt: 1 }}>Optionally you can skip.</FormHelperText>
+                <FormHelperText sx={{ mt: 1 }}>Welcome back Login to continue!</FormHelperText>
                 {/* {formik.errors.submit && (
                   <Typography color="error" sx={{ mt: 3 }} variant="body2">
                     {formik.errors.submit}
@@ -134,9 +120,7 @@ const Page = () => {
                 <Button fullWidth size="large" sx={{ mt: 3 }} type="submit" variant="contained">
                   Login
                 </Button>
-                {/* <Button fullWidth size="large" sx={{ mt: 3 }} onClick={handleSkip}>
-                  Skip authentication
-                </Button> */}
+
                 {/* <Alert color="primary" severity="info" sx={{ mt: 3 }}>
                   <div>
                     You can use <b>demo@devias.io</b> and password <b>Password123!</b>
@@ -144,21 +128,13 @@ const Page = () => {
                 </Alert> */}
                 {formik.errors.submit && (
                   <Alert color="error" severity="info" sx={{ mt: 3 }}>
-                    {formik.errors.submit}
+                    <Typography color="error" variant="body2">
+                      {formik.errors.submit}
+                    </Typography>
                   </Alert>
                 )}
               </form>
             )}
-            {/* {method === "phoneNumber" && (
-              <div>
-                <Typography sx={{ mb: 1 }} variant="h6">
-                  Not available in the demo
-                </Typography>
-                <Typography color="text.secondary">
-                  To prevent unnecessary costs we disabled this feature in the demo.
-                </Typography>
-              </div>
-            )} */}
           </div>
         </Box>
       </Box>
