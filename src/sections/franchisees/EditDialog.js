@@ -21,6 +21,11 @@ const EditFranchiseForm = ({ franchiseData, setOpen, open }) => {
   const [openConfirmation, setOpenConfirmation] = useState(false);
   const [confirmationAction, setConfirmationAction] = useState(null);
 
+  const [nameError, setNameError] = useState("");
+  const [phoneNumberError, setPhoneNumberError] = useState("");
+  const [locationError, setLocationError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
   const [formData, setFormData] = useState({
     name: "",
     phoneNumber: "",
@@ -36,14 +41,63 @@ const EditFranchiseForm = ({ franchiseData, setOpen, open }) => {
         name: franchiseData.name || "",
         phoneNumber: franchiseData.phoneNumber || "",
         location: franchiseData.location || "",
-        password: franchiseData.password || "",
+        password: "",
       });
       setImagePreview(franchiseData.imageUrl);
     }
   }, [open, franchiseData]);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+
+    // Validate input value after each change
+    switch (name) {
+      case "name":
+        validateName(value);
+        break;
+      case "phoneNumber":
+        validatePhoneNumber(value);
+        break;
+      case "location":
+        validateLocation(value);
+        break;
+      case "password":
+        validatePassword(value);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+
+    // Reset corresponding error when the user types
+    switch (name) {
+      case "name":
+        if (!value.trim()) {
+          setNameError("Franchise name is required");
+        }
+        break;
+      case "phoneNumber":
+        if (!value.trim()) {
+          setPhoneNumberError("Phone number is required");
+        }
+        break;
+      case "location":
+        if (!value.trim()) {
+          setLocationError("Location is required");
+        }
+        break;
+      case "password":
+        if (!value.trim()) {
+          setPasswordError("Password is required");
+        }
+        break;
+      default:
+        break;
+    }
   };
 
   const handleImageChange = (e) => {
@@ -64,6 +118,16 @@ const EditFranchiseForm = ({ franchiseData, setOpen, open }) => {
 
   const handleEdit = (e) => {
     e.preventDefault();
+
+    const isNameValid = validateName(formData.name);
+    const isPhoneNumberValid = validatePhoneNumber(formData.phoneNumber);
+    const isLocationValid = validateLocation(formData.location);
+    const isPasswordValid = validatePassword(formData.password);
+
+    if (!isNameValid || !isPhoneNumberValid || !isLocationValid || !isPasswordValid) {
+      return;
+    }
+
     try {
       const formDataToSend = new FormData();
       for (let key in formData) {
@@ -74,7 +138,6 @@ const EditFranchiseForm = ({ franchiseData, setOpen, open }) => {
 
       // Reset form after submission
       setOpen(false);
-
       setImagePreview(null);
     } catch (error) {
       console.error("Error editing franchise:", error);
@@ -103,9 +166,47 @@ const EditFranchiseForm = ({ franchiseData, setOpen, open }) => {
     handleOpenConfirmation(deleteFranchise);
   };
 
+  //validation setup here;
+  const validateName = (name) => {
+    if (!name.trim()) {
+      setNameError("Name is required");
+      return false;
+    }
+    setNameError("");
+    return true;
+  };
+
+  const validatePhoneNumber = (phoneNumber) => {
+    if (!phoneNumber.trim()) {
+      setPhoneNumberError("Phone number is required");
+      return false;
+    }
+    setPhoneNumberError("");
+    return true;
+  };
+
+  const validateLocation = (location) => {
+    if (!location.trim()) {
+      setLocationError("Location is required");
+      return false;
+    }
+    setLocationError("");
+    return true;
+  };
+
+  const validatePassword = (password) => {
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+
+    if (!passwordRegex.test(password)) {
+      setPasswordError("Password must contain at least 8 characters, one letter, and one number");
+      return false;
+    }
+    setPasswordError("");
+    return true;
+  };
+
   return (
     <div>
-      {" "}
       <Dialog open={open} onClose={handleClose}>
         <DialogContent>
           {/* Edit form section */}
@@ -121,7 +222,11 @@ const EditFranchiseForm = ({ franchiseData, setOpen, open }) => {
               onChange={handleChange}
               variant="outlined"
               margin="normal"
+              onBlur={handleBlur}
             />
+            <Typography color="error" variant="body2">
+              {nameError}
+            </Typography>
             <TextField
               fullWidth
               label="Phone Number"
@@ -130,8 +235,12 @@ const EditFranchiseForm = ({ franchiseData, setOpen, open }) => {
               margin="normal"
               value={formData.phoneNumber}
               type="tel"
+              onBlur={handleBlur}
               onChange={handlePhoneNumberChange}
             />
+            <Typography color="error" variant="body2">
+              {phoneNumberError}
+            </Typography>
             <TextField
               fullWidth
               label="Location"
@@ -139,9 +248,13 @@ const EditFranchiseForm = ({ franchiseData, setOpen, open }) => {
               variant="outlined"
               value={formData.location}
               onChange={handleChange}
+              onBlur={handleBlur}
               margin="normal"
               type="text"
             />
+            <Typography color="error" variant="body2">
+              {locationError}
+            </Typography>
             <TextField
               fullWidth
               label="Password"
@@ -149,9 +262,13 @@ const EditFranchiseForm = ({ franchiseData, setOpen, open }) => {
               variant="outlined"
               value={formData.password}
               onChange={handleChange}
+              onBlur={handleBlur}
               margin="normal"
               type="password"
             />
+            <Typography color="error" variant="body2">
+              {passwordError}
+            </Typography>
             <input
               type="file"
               accept="image/*"
