@@ -19,12 +19,13 @@ import {
 // third-party
 import { NumericFormat } from "react-number-format";
 import Dot from "src/components/Dot";
+import RestaurantModal from "./restaurantModal/restaurantModal";
 
 // project import
 //import Dot from 'components/@extended/Dot';
 
-function createData(trackingNo, name, fat, carbs, protein) {
-  return { trackingNo, name, fat, carbs, protein };
+function createData(_id, name, fat, status, protein) {
+  return { _id, name, fat, status, protein };
 }
 
 export const rows = [
@@ -86,32 +87,32 @@ const headCells = [
     id: "trackingNo",
     align: "left",
     disablePadding: false,
-    label: "Tracking No.",
+    label: "Tracking_Id.",
   },
   {
     id: "name",
     align: "left",
     disablePadding: true,
-    label: "Restaurants Name",
+    label: "Franchise Name",
   },
   {
-    id: "fat",
+    id: "location",
     align: "right",
     disablePadding: false,
-    label: "Total Order",
+    label: "Location",
   },
   {
-    id: "carbs",
+    id: "status",
     align: "left",
     disablePadding: false,
 
     label: "Status",
   },
   {
-    id: "protein",
+    id: "phoneNumber",
     align: "right",
     disablePadding: false,
-    label: "Total Profit",
+    label: "Phone Number",
   },
 ];
 
@@ -148,18 +149,15 @@ const OrderStatus = ({ status }) => {
   let title;
 
   switch (status) {
-    case 0:
-      color = "warning";
-      title = "Pending";
-      break;
-    case 1:
+    case "active":
       color = "success";
-      title = "Available";
+      title = "active";
       break;
-    case 2:
+    case "blocked":
       color = "error";
-      title = "Unavailable";
+      title = "blocked";
       break;
+
     default:
       color = "primary";
       title = "None";
@@ -179,106 +177,92 @@ OrderStatus.propTypes = {
 
 // ==============================|| ORDER TABLE ||============================== //
 
-export default function OrderTable({ displayedRows }) {
+export default function OrderTable({ displayedFranchise }) {
+  const [restaurantModal, setOpenRestaurantModal] = useState(false);
   const [order] = useState("asc");
   const [orderBy] = useState("trackingNo");
   const [selected] = useState([]);
 
   const isSelected = (trackingNo) => selected.indexOf(trackingNo) !== -1;
 
+  const [selectedFranchise, setSelectedFranchise] = useState(null);
+
+  const handleLinkClick = (franchiseName) => {
+    setSelectedFranchise(franchiseName);
+    setOpenRestaurantModal(!restaurantModal); // Toggle the modal
+  };
+
   return (
-    <Box>
-      <TableContainer
-        sx={{
-          width: "100%",
-          overflowX: "auto",
-          position: "relative",
-          display: "block",
-          maxWidth: "100%",
-          "& td, & th": { whiteSpace: "nowrap" },
-        }}
-      >
-        <Table
-          aria-labelledby="tableTitle"
+    <>
+      <Box>
+        <TableContainer
           sx={{
-            "& .MuiTableCell-root:first-of-type": {
-              pl: 2,
-            },
-            "& .MuiTableCell-root:last-of-type": {
-              pr: 3,
-            },
+            width: "100%",
+            overflowX: "auto",
+            position: "relative",
+            display: "block",
+            maxWidth: "100%",
+            "& td, & th": { whiteSpace: "nowrap" },
           }}
         >
-          <OrderTableHead order={order} orderBy={orderBy} />
-          <TableBody>
-            {displayedRows.map((row, index) => {
-              const isItemSelected = isSelected(row.trackingNo);
-              console.log(row.carbs);
-              //const labelId = `enhanced-table-checkbox-${index}`;
+          <Table
+            aria-labelledby="tableTitle"
+            sx={{
+              "& .MuiTableCell-root:first-of-type": {
+                pl: 2,
+              },
+              "& .MuiTableCell-root:last-of-type": {
+                pr: 3,
+              },
+            }}
+          >
+            <OrderTableHead order={order} orderBy={orderBy} />
+            <TableBody>
+              {displayedFranchise.map((row, index) => {
+                const isItemSelected = isSelected(row.trackingNo);
 
-              return (
-                <TableRow
-                  hover
-                  role="checkbox"
-                  aria-checked={isItemSelected}
-                  tabIndex={-1}
-                  key={row.trackingNo}
-                  selected={isItemSelected}
-                >
-                  <TableCell component="th" scope="row">
-                    <Link color="secondary" component={RouterLink} to="" sx={{ cursor: "pointer" }}>
-                      {row.trackingNo}
-                    </Link>
-                  </TableCell>
-                  <TableCell>{row.name}</TableCell>
-                  <TableCell align="right">{row.fat}</TableCell>
+                //const labelId = `enhanced-table-checkbox-${index}`;
 
-                  <TableCell align="left">
-                    <OrderStatus status={row.carbs} />
-                  </TableCell>
-                  <TableCell align="right">${row.protein}</TableCell>
-                </TableRow>
-              );
-            })}
+                return (
+                  <TableRow
+                    hover
+                    role="checkbox"
+                    aria-checked={isItemSelected}
+                    tabIndex={-1}
+                    key={row._id}
+                    selected={isItemSelected}
+                  >
+                    <TableCell component="th" scope="row">
+                      <Link
+                        color="secondary"
+                        component={RouterLink}
+                        to=""
+                        sx={{ cursor: "pointer" }}
+                        // onClick={() => setOpenRestaurantModal(!restaurantModal)}
+                        onClick={() => handleLinkClick(row.franchiseName)}
+                      >
+                        {row._id}
+                      </Link>
+                    </TableCell>
+                    <TableCell>{row.name}</TableCell>
+                    <TableCell align="right">{row.location}</TableCell>
 
-            {/* {stableSort(rows, getComparator(order, orderBy)).map((row, index) => {
-              const isItemSelected = isSelected(row.trackingNo);
-              const labelId = `enhanced-table-checkbox-${index}`;
-
-              return (
-                <TableRow
-                  hover
-                  role="checkbox"
-                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                  aria-checked={isItemSelected}
-                  tabIndex={-1}
-                  key={row.trackingNo}
-                  selected={isItemSelected}
-                >
-                  <TableCell component="th" id={labelId} scope="row" align="left">
-                    <Link color="secondary" component={RouterLink} to="" sx={{ cursor: "pointer" }}>
-                      {row.trackingNo}
-                    </Link>
-                  </TableCell>
-                  <TableCell align="left">{row.name}</TableCell>
-                  <TableCell align="right">{row.fat}</TableCell>
-                  <TableCell align="left">
-                    <OrderStatus status={row.carbs} />
-                  </TableCell>
-                  <TableCell align="right">
-                    <NumericFormat
-                      value={row.protein}
-                      displayType="text"
-                      thousandSeparator
-                      prefix="$"
-                    />
-                  </TableCell>
-                </TableRow>
-              );
-            })} */}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Box>
+                    <TableCell align="left">
+                      <OrderStatus status={row.status} />
+                    </TableCell>
+                    <TableCell align="right">{row.phoneNumber}</TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
+      <RestaurantModal
+        franchiseName={selectedFranchise}
+        setOpenRestaurantModal={setOpenRestaurantModal}
+        restaurantModal={restaurantModal}
+      />
+    </>
   );
 }

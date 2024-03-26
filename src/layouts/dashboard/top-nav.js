@@ -24,14 +24,7 @@ const SIDE_NAV_WIDTH = 280;
 const TOP_NAV_HEIGHT = 64;
 
 export const TopNav = (props) => {
-  const { user } = useAuth();
-
-  let full_name = user?.adminData ? `${user.adminData.fname} ${user.adminData.lname}` : "Admin";
-
-  //let phone_number = user?.adminData?phone_number ? user.adminData.phone_number : "";
-  let profile_image = user?.adminData?.adminImg || null;
-
-  //const user = { fname: "shamla" };
+  const { admin } = useAuth();
 
   const { onNavOpen } = props;
   const lgUp = useMediaQuery((theme) => theme.breakpoints.up("lg"));
@@ -54,7 +47,6 @@ export const TopNav = (props) => {
   };
 
   let greeting = getGreeting();
-  //const userName = "Mr./Mrs. Admin";
 
   return (
     <>
@@ -98,7 +90,9 @@ export const TopNav = (props) => {
               <div className="greeting-container">
                 <h4 className="greeting-text">
                   {greeting}{" "}
-                  <span style={{ textDecoration: "underline", color: "#4338CA" }}>{full_name}</span>
+                  <span style={{ textDecoration: "underline", color: "#4338CA" }}>
+                    {admin.fname && admin.lname ? `${admin.fname} ${admin.lname}` : "Admin"}
+                  </span>
                 </h4>
               </div>
             </Tooltip>
@@ -134,11 +128,11 @@ export const TopNav = (props) => {
                   height: 40,
                   width: 40,
                 }}
-                src={profile_image}
+                src={admin.adminImg ? `${adminImageUrl}/${admin.adminImg}` : ""}
               />
               <Stack>
                 <Typography variant="h6" style={{ cursor: "pointer" }}>
-                  {full_name}
+                  {admin.fname && admin.lname ? `${admin.fname} ${admin.lname}` : "Admin"}
                 </Typography>
               </Stack>
             </Stack>
@@ -149,7 +143,7 @@ export const TopNav = (props) => {
         anchorEl={accountPopover.anchorRef.current}
         open={accountPopover.open}
         onClose={accountPopover.handleClose}
-        full_name={full_name}
+        full_name={admin ? admin.fname + admin.lname : "Admin"}
       />
     </>
   );

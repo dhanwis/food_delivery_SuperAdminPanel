@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import Head from "next/head";
 import PlusIcon from "@heroicons/react/24/solid/PlusIcon";
 import {
@@ -6,28 +7,57 @@ import {
   Container,
   Pagination,
   Stack,
-  SvgIcon,
-  Typography,
   Unstable_Grid2 as Grid,
   Card,
 } from "@mui/material";
 import { Layout as DashboardLayout } from "src/layouts/dashboard/layout";
 import OrderTable, { rows } from "./OrdersTable";
 import { useState } from "react";
+import { useFranchise } from "src/contexts/franchise-context";
 import { RestaurantsSearch } from "./restaurants-search";
 
 const Page = () => {
-  const rowsPerPage = 5;
+  const { fetchFranchises } = useFranchise();
+
+  const [franchiseData, setFranchiseData] = useState([]);
+  const [searchQuery, setSearchQuery] = useState(""); // State to hold the search query
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const fetchedData = await fetchFranchises();
+      setFranchiseData(fetchedData);
+    };
+    fetchData();
+    setIsLoading(false);
+  }, [fetchFranchises]); // Make sure to include fetchFranchises in the dependency array
+
+  const rowsPerPage = 10;
   const [page, setPage] = useState(0);
 
-  const startIndex = page * rowsPerPage; // which is eg: (2*5 == 10)
-  const endIndex = startIndex + rowsPerPage;
-
-  const displayedRows = rows.slice(startIndex, endIndex);
+  //const displayedRows = franchiseData.slice(startIndex, endIndex);
 
   const handlePageChange = (event, newPage) => {
     setPage(newPage - 1);
   };
+
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+    setPage(0); // Reset page when search query changes
+  };
+
+  const filteredFranchise = franchiseData.filter((franchise) =>
+    franchise.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const totalFranchises = filteredFranchise.length;
+  const totalPages = Math.ceil(totalFranchises / rowsPerPage);
+
+  // Calculate displayed franchises based on pagination
+  const startIndex = page * rowsPerPage;
+  const endIndex = Math.min(startIndex + rowsPerPage, totalFranchises);
+
+  const displayedFranchise = filteredFranchise.slice(startIndex, endIndex);
 
   return (
     <>
@@ -39,60 +69,17 @@ const Page = () => {
         sx={{
           flexGrow: 1,
           py: 8,
+          background: "url('/pexels-ella-olsson-1640777.jpg')", // Change the path to your background image
+          backgroundSize: "cover",
         }}
       >
         <Container maxWidth="xl">
           <Stack spacing={3}>
-            <Stack direction="row" justifyContent="space-between" spacing={4}>
-              <Stack spacing={1}>
-                <Typography variant="h4">Restaurants</Typography>
-                {/* <Stack alignItems="center" direction="row" spacing={1}> Import & export buttons are hidden
-                  <Button
-                    color="inherit"
-                    startIcon={
-                      <SvgIcon fontSize="small">
-                        <ArrowUpOnSquareIcon />
-                      </SvgIcon>
-                    }
-                  >
-                    Import
-                  </Button>
-                  <Button
-                    color="inherit"
-                    startIcon={
-                      <SvgIcon fontSize="small">
-                        <ArrowDownOnSquareIcon />
-                      </SvgIcon>
-                    }
-                  >
-                    Export
-                  </Button>
-                </Stack> */}
-              </Stack>
-              <div>
-                <Button
-                  startIcon={
-                    <SvgIcon fontSize="small">
-                      <PlusIcon />
-                    </SvgIcon>
-                  }
-                  variant="contained"
-                >
-                  Add
-                </Button>
-              </div>
-            </Stack>
-            <RestaurantsSearch />
+            <RestaurantsSearch handleSearchChange={handleSearchChange} />
 
             <Grid item xs={12} md={7} lg={8}>
-              <Grid container alignItems="center" justifyContent="space-between">
-                <Grid item>
-                  <Typography variant="h5">Top Restaurants </Typography>
-                </Grid>
-                <Grid item />
-              </Grid>
               <Card sx={{ mt: 2 }} content={false}>
-                <OrderTable displayedRows={displayedRows} />
+                <OrderTable displayedFranchise={displayedFranchise} />
               </Card>
             </Grid>
             <Box
@@ -102,7 +89,7 @@ const Page = () => {
               }}
             >
               <Pagination
-                count={Math.ceil(rows.length / rowsPerPage)}
+                count={totalPages}
                 page={page + 1}
                 onChange={handlePageChange}
                 size="large"

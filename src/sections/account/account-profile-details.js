@@ -19,11 +19,9 @@ import { useAuth } from "src/hooks/use-auth";
 import { adminImageUrl } from "src/utils/constant/urls";
 
 export const AccountProfileDetails = () => {
-  const { user, createProfile } = useAuth();
-  const adminData = user?.adminData;
-  console.log(useAuth());
+  const { admin, create_or_updateAdminProfile } = useAuth();
 
-  let full_name = user?.adminData ? `${user.adminData.fname} ${user.adminData.lname}` : "Admin";
+  console.log(useAuth());
 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
@@ -31,31 +29,26 @@ export const AccountProfileDetails = () => {
   const [formData, setFormData] = useState({
     fname: "",
     lname: "",
-    emailID: "",
     adminPhoneNumber: "",
     adminImg: null,
   });
   const [errors, setErrors] = useState({
     fname: "",
     lname: "",
-    emailID: "",
     adminPhoneNumber: "",
   });
 
   useEffect(() => {
-    if (adminData) {
+    if (admin) {
       setFormData({
-        //_id: adminData._id,
-        fname: adminData && adminData.fname,
-        lname: adminData && adminData.lname,
-        emailID: adminData && adminData.email,
-        adminPhoneNumber: adminData && adminData.adminPhoneNumber,
-        adminImg: adminData.adminImg ? adminData.adminImg : null,
+        fname: admin && admin.fname,
+        lname: admin && admin.lname,
+        adminPhoneNumber: admin && admin.adminPhoneNumber,
       });
 
-      setImagePreview(adminData.adminImg ? adminData.adminImg : null);
+      //setImagePreview(admin.adminImg && admin.adminImg);
     }
-  }, [adminData]);
+  }, [admin]);
 
   useEffect(() => {
     // Close success modal after 5 seconds
@@ -109,11 +102,6 @@ export const AccountProfileDetails = () => {
       formIsValid = false;
     }
 
-    // if (!formData.emailID) {
-    //   newErrors.emailID = "Email is required";
-    //   formIsValid = false;
-    // }
-
     if (!formData.adminPhoneNumber) {
       newErrors.adminPhoneNumber = "Phone number is required";
       formIsValid = false;
@@ -128,15 +116,15 @@ export const AccountProfileDetails = () => {
         for (let key in formData) {
           formDataToSend.append(key, formData[key]);
         }
-        await createProfile(formDataToSend);
+        await create_or_updateAdminProfile(formDataToSend);
         setShowSuccessModal(!showSuccessModal);
+        //  location.reload();
       } catch (error) {
         console.error("Error updating profile:", error);
       }
     }
   };
-
-  //  console.log(imagePreview);
+  //console.log(imagePreview);
 
   return (
     <form onSubmit={handleSubmit}>
@@ -152,15 +140,16 @@ export const AccountProfileDetails = () => {
               }}
             >
               <Avatar
-                src={imagePreview && imagePreview}
+                src={admin.adminImg ? `${adminImageUrl}/${admin.adminImg}` : imagePreview}
                 sx={{
                   height: 80,
                   mb: 2,
                   width: 80,
                 }}
               />
+
               <Typography gutterBottom variant="h5">
-                {full_name}
+                {admin.fname && admin.lname ? `${admin.fname} ${admin.lname}` : "Admin"}
               </Typography>
               {/* <Typography color="text.secondary" variant="body2">
                 {adminData.state} {adminData.country}

@@ -6,8 +6,7 @@ const HANDLERS = {
   INITIALIZE: "INITIALIZE",
   SIGN_IN: "SIGN_IN",
   SIGN_OUT: "SIGN_OUT",
-  CREATE_PROFILE: "CREATE_PROFILE",
-  UPDATE_PROFILE: "UPDATE_PROFILE",
+  CREATE_OR_UPDATE_PROFILE: "CREATE_OR_UPDATE_PROFILE",
 };
 
 const initialState = {
@@ -34,18 +33,15 @@ const handlers = {
           }),
     };
   },
-  //for authentication true
   [HANDLERS.SIGN_IN]: (state, action) => {
     const user = action.payload;
-    console.log("user" + user);
+
     return {
       ...state,
       isAuthenticated: true,
       user,
     };
   },
-
-  //for authentication false
   [HANDLERS.SIGN_OUT]: (state) => {
     return {
       ...state,
@@ -53,9 +49,7 @@ const handlers = {
       user: null,
     };
   },
-
-  //for authentication false
-  [HANDLERS.CREATE_PROFILE]: (state, action) => {
+  [HANDLERS.CREATE_OR_UPDATE_PROFILE]: (state, action) => {
     const user = action.payload;
 
     return {
@@ -64,34 +58,19 @@ const handlers = {
       user,
     };
   },
-
-  // //for authentication false
-  // [HANDLERS.UPDATE_PROFILE]: (state, action) => {
-  //   const user = action.payload;
-
-  //   return {
-  //     ...state,
-  //     isAuthenticated: true,
-  //     user,
-  //   };
-  // },
 };
 
 const reducer = (state, action) =>
   handlers[action.type] ? handlers[action.type](state, action) : state;
 
-// The role of this context is to propagate authentication state through the App tree.
-
 export const AuthContext = createContext({ undefined });
 
 export const AuthProvider = (props) => {
   const { children } = props;
-
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [admin, setAdmin] = useState({});
 
   const initialized = useRef(false);
-
-  // Inside the initialize function
   const initialize = async () => {
     if (initialized.current) {
       return;
@@ -101,24 +80,13 @@ export const AuthProvider = (props) => {
 
     try {
       const token = localStorage.getItem("token");
-      const adminDataProfileData = JSON.parse(localStorage.getItem("adminData"));
-      //console.log(adminDataProfileData);
-      //console.log(token);
 
       if (token) {
-        // Token exists and is not expired
-        dispatch({
-          type: HANDLERS.INITIALIZE,
-          payload: { token: token, adminData: adminDataProfileData },
-        });
-        console.log("token available");
-        console.log(adminDataProfileData);
+        dispatch({ type: HANDLERS.INITIALIZE, payload: { token } });
       } else {
         dispatch({
           type: HANDLERS.INITIALIZE,
         });
-        console.log("token not found");
-        console.log("admin not found");
       }
     } catch (error) {
       console.error("Error initializing authentication:", error);
@@ -127,78 +95,76 @@ export const AuthProvider = (props) => {
 
   useEffect(() => {
     initialize();
+    fetchAdminData();
   }, []);
 
-  // Inside the signIn function, set token expiration time when creating the token
   const signIn = async (email, password) => {
     try {
-      const response = await axios.post("/signIn", { email, password });
+      const response = await axios.post("admin/signIn", { email, password });
+      const token = await response.data.token;
 
-      localStorage.setItem("token", response.data.token);
-      //localStorage.setItem("adminData", admin);
-      //console.log(localStorage.getItem("adminData"));
+      localStorage.setItem("token", token);
 
-      dispatch({
-        type: HANDLERS.SIGN_IN,
-        payload: { token: response.data.token },
-      });
+      dispatch({ type: HANDLERS.SIGN_IN, payload: token });
     } catch (error) {
       console.error("Sign in failed:", error);
       throw new Error("Sign in failed. Please try again.");
     }
   };
 
-  // Inside the signOut function, clear local storage and dispatch SIGN_OUT action
   const signOut = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("adminData");
-    dispatch({
-      type: HANDLERS.SIGN_OUT,
-    });
+    dispatch({ type: HANDLERS.SIGN_OUT });
   };
 
-  const createProfile = async (adminData) => {
+  const fetchAdminData = async () => {
     try {
-      const response = await axios.post("/createAdminProfile", adminData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      const adminProfileData = response.data;
-      console.log(adminProfileData);
-      localStorage.setItem("adminData", JSON.stringify(adminProfileData));
+      // Make GET request to fetch all franchises
+      const response = await axios.get("admin/getAdminProfile");
+      if (response.status !== 200) {
+        throw new Error("Failed to fetch adminData");
+      }
 
-      dispatch({ type: HANDLERS.CREATE_PROFILE, payload: { adminData: adminProfileData } });
+      // Extract data from response
+      const updatedAdminData = response.data;
+
+      // Optionally transform data
+      const transformedAdmin = setAdmin((prevAdmin) => ({
+        ...prevAdmin,
+        ...updatedAdminData,
+        //adminImg: upda.imageUrl ? `${imageUrl}/${franchise.imageUrl}` : null,
+      }));
+
+      return transformedAdmin;
     } catch (error) {
-      console.error("Error creating admin profile:", error);
-      throw new Error("Error creating admin profile. Please try again later.");
+      console.error("Error fetching franchises:", error);
+      throw error;
     }
   };
 
-  // const updateProfile = async (adminData) => {
-  //   try {
-  //     // Send a POST request to update the admin profile
-  //     const response = await axios.post("/updateAdminProfile", adminData, {
-  //       headers: { "Content-Type": "multipart/form-data" },
-  //     });
-  //     //Retrieve the updated admin profile data from the response
-  //     const updatedAdminProfileData = response.data;
-  //     // Update the relevant fields in the local storage admin data
-  //     const storedAdminData = JSON.parse(localStorage.getItem("adminData"));
+  const create_or_updateAdminProfile = async (adminDataToSend) => {
+    try {
+      const response = await axios.post("admin/create_or_updateAdminProfile", adminDataToSend, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-  //     const updatedStoredAdminData = {
-  //       ...storedAdminData,
-  //       ...updatedAdminProfileData,
-  //     };
-  //     // Update the admin profile data in local storage
-  //     localStorage.setItem("adminData", JSON.stringify(updatedStoredAdminData));
+      const updatedAdminData = response.data.adminData;
 
-  //     // Dispatch an action to update the admin profile state in the context
-  //     dispatch({ type: HANDLERS.UPDATE_PROFILE, payload: updatedAdminProfileData });
-  //   } catch (error) {
-  //     // Handle errors
-  //     console.error("Error updating admin profile:", error);
-  //     throw new Error("Error updating admin profile. Please try again later.");
-  //   }
-  // };
+      // Store updated admin data in localStorage
+      //localStorage.setItem("adminData", JSON.stringify(updatedAdminData));
+      if (admin) {
+        setAdmin((prevAdmin) => ({ ...prevAdmin, ...updatedAdminData }));
+      } else {
+        setAdmin(updatedAdminData);
+      }
+
+      // Dispatch action to update admin profile in context state
+      //dispatch({ type: HANDLERS.UPDATE_PROFILE, payload: updatedAdminData });
+    } catch (error) {
+      console.error("Error updating admin profile:", error);
+      throw new Error("Error updating admin profile. Please try again later.");
+    }
+  };
 
   return (
     <AuthContext.Provider
@@ -206,8 +172,8 @@ export const AuthProvider = (props) => {
         ...state,
         signIn,
         signOut,
-        createProfile,
-        // updateProfile,
+        admin,
+        create_or_updateAdminProfile,
       }}
     >
       {children}

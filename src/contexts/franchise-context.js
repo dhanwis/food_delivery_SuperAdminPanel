@@ -14,7 +14,6 @@ export const FranchiseProvider = ({ children }) => {
   const [franchises, setFranchises] = useState([]);
 
   // Function to add a new franchise
-  // Function to add a new franchise
   const addFranchise = async (newFranchise) => {
     try {
       // Make POST request to add new franchise
@@ -38,7 +37,7 @@ export const FranchiseProvider = ({ children }) => {
   const editFranchise = async (franchiseId, updatedData) => {
     try {
       // Make PUT request to update franchise
-      const response = await axios.put(`/${franchiseId}`, updatedData, {
+      const response = await axios.put(`franchise/${franchiseId}`, updatedData, {
         headers: {
           "Content-Type": "multipart/form-data", // Ensure correct content type
         },
@@ -64,7 +63,7 @@ export const FranchiseProvider = ({ children }) => {
   const fetchFranchises = async () => {
     try {
       // Make GET request to fetch all franchises
-      const response = await axios.get("/allFranchiseData");
+      const response = await axios.get("franchise/allFranchiseData");
       if (response.status !== 200) {
         throw new Error("Failed to fetch franchises");
       }
@@ -90,7 +89,7 @@ export const FranchiseProvider = ({ children }) => {
   const deleteFranchise = async (franchiseId) => {
     try {
       // Send DELETE request to delete franchise
-      let response = await axios.delete(`/${franchiseId}`);
+      let response = await axios.delete(`franchise/${franchiseId}`);
 
       if (response.status === 200) {
         setFranchises((prevFranchises) =>
@@ -109,7 +108,7 @@ export const FranchiseProvider = ({ children }) => {
   const blockFranchise = async (franchiseId) => {
     try {
       // Make a request to your backend API to block the franchise
-      const response = await axios.put(`/block-franchise/${franchiseId}`);
+      const response = await axios.put(`franchise/block-franchise/${franchiseId}`);
 
       if (response.status === 200) {
         // Update the franchise status in the frontend
@@ -131,7 +130,7 @@ export const FranchiseProvider = ({ children }) => {
   const unblockFranchise = async (franchiseId) => {
     try {
       // Make a request to your backend API to unblock the franchise
-      const response = await axios.put(`/unblock-franchise/${franchiseId}`);
+      const response = await axios.put(`franchise/unblock-franchise/${franchiseId}`);
 
       if (response.status === 200) {
         // Update the franchise status in the frontend
