@@ -17,7 +17,7 @@ export const FranchiseProvider = ({ children }) => {
   const addFranchise = async (newFranchise) => {
     try {
       // Make POST request to add new franchise
-      const response = await axios.post("/addFranchise", newFranchise);
+      const response = await axios.post("franchise/addFranchise", newFranchise);
 
       if (response.status === 201) {
         // Add the newly created franchise from response data to the state
